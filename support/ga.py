@@ -197,3 +197,7 @@ class population:
 
         else:
             print("Breeding aborted.")
+
+    def fill_empty_population(self, **kwargs):
+        """If population pool < max population, will fill space with new dna members"""
+        return None
