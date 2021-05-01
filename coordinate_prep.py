@@ -1,8 +1,8 @@
 import sys
 
 # Hit every square on a 10 x10 grid
-max_x = 1000
-max_y = 1000
+max_x = 100
+max_y = 100
 
 done_x = False
 done_y = False
@@ -10,7 +10,7 @@ done_y = False
 x_pos = 0
 y_pos = 0
 
-inter = 1
+inter = .0001
 
 with open("coordinates.csv", "w") as c:
     # Write header
