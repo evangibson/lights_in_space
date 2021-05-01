@@ -63,14 +63,15 @@ class dna:
             self.eval_values.append(de)
 
     def evaluate(self, evaluation_function):
-        """Evaluation function should be passed as a lambda function that tolerates the decoded chromosome values"""
+        """Evaluation function should be passed as a lambda function that tolerates the decoded chromosome values
+        Only accepts one argument. Will need multi item lambda function to handle more than one value"""
         #  Arguments will be passed to eval function from left to right. Fitness function will need to index a list
         self.fitness = evaluation_function(self.eval_values)
 
     def mutate(self,
                chromosome_to_call,
                bit_to_flip):
-        """Flips a bit to it's opposite. Will not determine randomness of procedure"""
+        """Flips a bit to its opposite. Will not determine randomness of procedure"""
         if self.full[chromosome_to_call][bit_to_flip] == 0:
             self.full[chromosome_to_call][bit_to_flip] = 1
         else:
@@ -85,8 +86,10 @@ class population:
                  # pass an existing population of dna objects if you don't want to generate a new one
                  start_index=None,
                  max_pop_size=100,  # can be set to the length of the dictionary of_dna_objects that are passed
+                 asc=True, # If true, will place low scores as winners
                  **kwargs):  # used to pass dna argument
 
+        self.asc = asc
         if start_index is None:
             self.start = 0
         else:
@@ -152,13 +155,13 @@ class population:
         self.ranks = pd.DataFrame({"ID": ids, "Score": fits}).sort_values("Score")
 
         # Generate a ranking column
-        self.ranks["Placement"] = self.ranks['Score'].rank()
+        self.ranks["Placement"] = self.ranks['Score'].rank(ascending=self.asc)
 
         return self.ranks
 
     def determine_survival(self, clone_function):
         """The clone function will act against the variable rank for each member of the population.
-        The function should a 0 or 1:
+        The function should return a 0 or 1:
         1 - Survive
         0 - Did not survive to next generation"""
         self.ranks['Survive'] = self.ranks["Placement"].map(clone_function)
@@ -194,3 +197,7 @@ class population:
 
         else:
             print("Breeding aborted.")
+
+    def fill_empty_population(self, **kwargs):
+        """If population pool < max population, will fill space with new dna members"""
+        return None
