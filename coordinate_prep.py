@@ -1,4 +1,5 @@
 import sys
+import timeit
 
 # Hit every square on a 10 x10 grid
 max_x = 100
@@ -10,9 +11,11 @@ done_y = False
 x_pos = 0
 y_pos = 0
 
-inter = .0001
+inter = .01
 
-with open("coordinates.csv", "w") as c:
+tic = timeit.default_timer()
+
+with open("Z://data_share/coordinates/100_100_01_coordinates.csv", "w") as c:
     # Write header
     row = "{},{}\n".format("x","y")
     c.write(row)
@@ -40,3 +43,7 @@ with open("coordinates.csv", "w") as c:
             done_y = False
 
     c.close()
+
+toc = timeit.default_timer()
+print("Elapsed time: {}".format(toc-tic))
+
