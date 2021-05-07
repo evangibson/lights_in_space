@@ -1,10 +1,10 @@
 # Write header
 
-for x in 0:10000
-    for y in 0:100
-        x = x * 1
-        y = y * 1
-        row = "$(x)"  # DO
+for q in 0:100000
+    for a in 0:100000
+        x = q * 0.001
+        y = a * 0.001
+        row = "$(x)         ,$(y)  "  # DO
         print("Progress: $(row) \r")
         flush(stdout)
         
