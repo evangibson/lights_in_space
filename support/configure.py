@@ -10,7 +10,7 @@ import json
 config_variables = ["float_precision",
                     "max_coor_value",
                     "num_circle_min",
-                    "num_circle_min"]
+                    "num_circle_max"]
 
 # Define functions
 
@@ -52,5 +52,6 @@ class helper:
                 # Create formatted dictionary for configuration
                 self.config = config_ask()
                 # At this point, we only create the file
-                f.write(self.config)
+                json_temp = json.dumps(self.config)
+                f.write(json_temp)
                 f.close()
