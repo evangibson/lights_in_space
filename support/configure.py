@@ -52,6 +52,6 @@ class helper:
                 # Create formatted dictionary for configuration
                 self.config = config_ask()
                 # At this point, we only create the file
-                json_temp = json.dumps(self.config)
+                json_temp = json.dumps(self.config, indent=4)
                 f.write(json_temp)
                 f.close()
