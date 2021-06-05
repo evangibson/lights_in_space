@@ -3,6 +3,7 @@ from support import configure
 import os
 import datetime
 import random
+import json
 
 
 
@@ -12,7 +13,7 @@ import random
 num_planes = 100
 
 # Number of monte carlo random casting points
-mc_points = 100000
+mc_points = 1000
 
 #%% Define assiatant functions
 def create_circle(max_x, max_y, float_precision_):
@@ -85,36 +86,85 @@ def main():
     config_local = configure.helper(os.path.join("config", "static.json"))
 
     # Decimal places for rounding functions
-    float_precision = config_local.config["float_precision"]
+    float_precision = int(config_local.config["float_precision"])
 
     # max x and y value for coordinate place. Minimum is zero
-    max_coor_value = config_local.config['max_coor_value']
+    max_coor_value = float(config_local.config['max_coor_value'])
 
     # Lowest number of circles allowed in each plane
-    num_circle_min = config_local.config['num_circle_min']
+    num_circle_min = int(config_local.config['num_circle_min'])
 
     # Highest number of allowed circles
-    num_circles_max = config_local.config['num_circles_max']
+    num_circles_max = int(config_local.config['num_circle_max'])
 
     # Area of the overall fenced area
     area_fence = max_coor_value**2 # Area of a square
 
+    # Create a plane container object
+    plane_dict = dict()
+
+    # Do loop for plane generation
     for c in range(num_planes):
-        plane_dict = dict()
 
+        # Naming convention for planes
+        plane_name = "plane_{}".format(str(c))
 
+        # Determine how many circles exist in this plane
+        temp_num_cirs = random.randint(num_circle_min, num_circles_max)
 
+        # Placeholder for circle generation
+        cir_null = 0
+
+        # List of circles in plane
+        circles_list = []
+        while temp_num_cirs > cir_null:
+            cir_null += 1
+            # generate a random circle within boundaries established in config
+            circle_temp = create_circle(max_coor_value, max_coor_value, float_precision)
+
+            # Add an interpretted dictionary to the list
+            circles_list.append({"x":circle_temp[0],
+                                 "y":circle_temp[1],
+                                 "r":circle_temp[2]})
+
+        # Compute area for circles on the plane
+        temp_area = monte_carlo_plane(circles_list, mc_points, max_coor_value, max_coor_value, 0, 0)
+
+        # Add list and area to plane dictionary
+        plane_dict.update({plane_name: {"plane": circles_list}, "area": temp_area})
 
     # Store timestamp info as string
     timing = dict({"year": datetime.datetime.now().year,
                    "day": datetime.datetime.now().day,
                    "month": datetime.datetime.now().month,
+                   "hour": datetime.datetime.now().hour,
                    "minute": datetime.datetime.now().minute})
 
-    date_string = "{year}_{day}_{month}_{minute}".format(timing)
+    date_string = "{year}_{day}_{month}_{hour}_{minute}".format(**timing)
+
+    # store config and run info within dictionary
+    plane_dict.update({"config":config_local.config})
+    plane_dict.update({"timestamp":date_string})
 
     # Declare filename for output
     outfile = os.path.join("data", "{}.json".format(date_string))
+
+    if os.path.isfile(outfile):
+        # Read file as json
+        with open(outfile, "w") as f:
+            # At this point, we only create the file
+            json_temp = json.dumps(plane_dict, indent=4)
+            f.write(json_temp)
+            f.close()
+
+    else:
+        os.makedirs(os.path.dirname(outfile), exist_ok=True)
+        with open(outfile, "w") as f:
+            # At this point, we only create the file
+            json_temp = json.dumps(plane_dict, indent=4)
+            f.write(json_temp)
+            f.close()
+
 
 #%% Execute main
 
