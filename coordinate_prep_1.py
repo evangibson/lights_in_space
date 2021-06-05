@@ -4,6 +4,7 @@ import os
 import datetime
 import random
 import json
+import timeit
 
 
 
@@ -13,7 +14,7 @@ import json
 num_planes = 100
 
 # Number of monte carlo random casting points
-mc_points = 1000
+mc_points = 100000
 
 #%% Define assiatant functions
 def create_circle(max_x, max_y, float_precision_):
@@ -169,5 +170,8 @@ def main():
 #%% Execute main
 
 if __name__ == "__main__":
+    tic = timeit.default_timer()
     main()
+    toc = timeit.default_timer()
+    print("Elapsed time: {}".format(toc - tic))
 
