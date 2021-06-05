@@ -47,6 +47,37 @@ def create_circle(max_x, max_y, float_precision_):
     return redu_x, redu_y, radius
 
 
+def monte_carlo_plane(list_of_point_dicts, num_points, max_x, max_y, min_x, min_y):
+    """Params:
+    list_of_points_dicts - [{x:3, y:2, r:3}, {...}, ...]
+    num_points - how many random points to cast within area
+    total_area - the total area of the plane"""
+    # Calculate total area of param box
+    total_area = (max_x - min_x) * (max_y - min_y)
+
+    # Will add value for each point within a circle
+    running_sum = 0
+    for n in range(num_points):
+        # generate a random point within the allowable range
+        mc_x = random.uniform(min_x, max_x)
+        mc_y = random.uniform(min_y, max_y)
+
+        # Check if random coordinate exists within ANY of the circles
+        for p in list_of_point_dicts:
+            #
+            if geo.cir_test(p["x"], p["y"], mc_x, mc_y, p["r"]):
+                running_sum += 1
+                # Break so we do not double count whether a point occurs within area of venn diagram
+                break
+
+            else:
+                pass
+    # The proportion of hits v total
+    prop_hits = running_sum / num_points
+
+    return total_area * prop_hits
+
+
 
 #%% Define main function
 def main():
@@ -67,6 +98,10 @@ def main():
 
     # Area of the overall fenced area
     area_fence = max_coor_value**2 # Area of a square
+
+    for c in range(num_planes):
+        plane_dict = dict()
+
 
 
 
