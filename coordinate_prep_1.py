@@ -131,7 +131,7 @@ def main():
         temp_area = monte_carlo_plane(circles_list, mc_points, max_coor_value, max_coor_value, 0, 0)
 
         # Add list and area to plane dictionary
-        plane_dict.update({plane_name: {"plane": circles_list}, "area": temp_area})
+        plane_dict.update({plane_name: {"plane": circles_list, "area": temp_area}})
 
     # Store timestamp info as string
     timing = dict({"year": datetime.datetime.now().year,
