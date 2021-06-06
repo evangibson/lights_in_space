@@ -6,13 +6,14 @@ import random
 import json
 import timeit
 import multiprocessing
+import sys
 
 
 
 #%% Static variables
 
 # Number of scenarios to generate
-num_planes = 100
+num_planes = 1000
 
 # Number of monte carlo random casting points
 mc_points = 100000
@@ -25,8 +26,8 @@ def create_circle(max_x, max_y, float_precision_):
     """Attempts to create a circle matching the given parameters"""
 
     # Use a factor of float precision to create a random point within max and min params. MUST BE REDUCED BEFORE USE
-    temp_x = random.randrange(1, stop=max_x * (10 ** float_precision_))
-    temp_y = random.randrange(1, stop=max_y * (10 ** float_precision_))
+    temp_x = random.randrange(1, stop=max_x * (10 ** float_precision_)-1) # Subtract by 1 to ensure non-zero value for maximum radius
+    temp_y = random.randrange(1, stop=max_y * (10 ** float_precision_)-1) # Subtract by 1 to ensure non-zero value for maximum radius
 
     # Reduced the numbers to their appropriate values
     redu_x = temp_x / 10 ** float_precision_
@@ -153,7 +154,7 @@ def main(core_use):
     plane_dict.update({"timestamp":date_string})
 
     # Declare filename for output
-    outfile = os.path.join("data", "{}.json".format(date_string))
+    outfile = os.path.join("filepath", "{}.json".format(date_string))
 
     if os.path.isfile(outfile):
         # Read file as json
@@ -175,9 +176,18 @@ def main(core_use):
 #%% Execute main
 
 if __name__ == "__main__":
+    # Start timer
     tic = timeit.default_timer()
-    pool = multiprocessing.Pool()
-    pool.map(main, range(0, cores_use))
-    pool.close()
-    toc = timeit.default_timer()
-    print("Elapsed time: {}".format(toc - tic))
+    iteration_count = 0
+
+    # Locks the script to run until interupted
+    continuation_lock = True
+    while continuation_lock:
+        iteration_count += 1
+        pool = multiprocessing.Pool()
+        pool.map(main, range(0, cores_use))
+        pool.close()
+        # Close timer
+        toc = timeit.default_timer()
+        sys.stdout.write("\033[K")  # Cursor up one line
+        print("Elapsed time: {}  Current Iteration: {}".format((toc - tic), iteration_count), end="\r")

@@ -5,6 +5,7 @@ import datetime
 import random
 import json
 import timeit
+import multiprocessing
 
 
 
@@ -16,13 +17,16 @@ num_planes = 100
 # Number of monte carlo random casting points
 mc_points = 100000
 
+# For multiprocessing
+cores_use = 20
+
 #%% Define assiatant functions
 def create_circle(max_x, max_y, float_precision_):
     """Attempts to create a circle matching the given parameters"""
 
     # Use a factor of float precision to create a random point within max and min params. MUST BE REDUCED BEFORE USE
-    temp_x = random.randrange(1, stop=max_x * (10 ** float_precision_))
-    temp_y = random.randrange(1, stop=max_y * (10 ** float_precision_))
+    temp_x = random.randrange(1, stop=max_x * (10 ** float_precision_)-1) # Subtract by 1 to ensure non-zero value for maximum radius
+    temp_y = random.randrange(1, stop=max_y * (10 ** float_precision_)-1) # Subtract by 1 to ensure non-zero value for maximum radius
 
     # Reduced the numbers to their appropriate values
     redu_x = temp_x / 10 ** float_precision_
@@ -82,7 +86,7 @@ def monte_carlo_plane(list_of_point_dicts, num_points, max_x, max_y, min_x, min_
 
 
 #%% Define main function
-def main():
+def main(core_use):
     # Load or create configuration
     config_local = configure.helper(os.path.join("config", "static.json"))
 
@@ -134,14 +138,15 @@ def main():
         # Add list and area to plane dictionary
         plane_dict.update({plane_name: {"plane": circles_list, "area": temp_area}})
 
-    # Store timestamp info as string
+    # Store timestamp info as string, also save core in use
     timing = dict({"year": datetime.datetime.now().year,
                    "day": datetime.datetime.now().day,
                    "month": datetime.datetime.now().month,
                    "hour": datetime.datetime.now().hour,
-                   "minute": datetime.datetime.now().minute})
+                   "minute": datetime.datetime.now().minute,
+                   "core": core_use})
 
-    date_string = "{year}_{day}_{month}_{hour}_{minute}".format(**timing)
+    date_string = "{year}_{day}_{month}_{hour}_{minute}_{core}".format(**timing)
 
     # store config and run info within dictionary
     plane_dict.update({"config":config_local.config})
@@ -171,7 +176,9 @@ def main():
 
 if __name__ == "__main__":
     tic = timeit.default_timer()
-    main()
+    pool = multiprocessing.Pool()
+    pool.map(main, range(0, cores_use))
+    pool.close()
     toc = timeit.default_timer()
     print("Elapsed time: {}".format(toc - tic))
 
