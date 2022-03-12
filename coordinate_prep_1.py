@@ -12,25 +12,22 @@ import multiprocessing
 #%% Static variables
 
 # Number of scenarios to generate
-num_planes = 100
-
-# Number of monte carlo random casting points
-mc_points = 100000
+num_planes = 10
 
 # For multiprocessing
-cores_use = 20
+cores_use = 8
 
-#%% Define assiatant functions
-def create_circle(max_x, max_y, float_precision_):
+#%% Define assistant functions
+def create_circle(max_x,
+                  max_y,
+                  min_x,
+                  min_y,
+                  min_radius):
     """Attempts to create a circle matching the given parameters"""
 
-    # Use a factor of float precision to create a random point within max and min params. MUST BE REDUCED BEFORE USE
-    temp_x = random.randrange(1, stop=max_x * (10 ** float_precision_)-1) # Subtract by 1 to ensure non-zero value for maximum radius
-    temp_y = random.randrange(1, stop=max_y * (10 ** float_precision_)-1) # Subtract by 1 to ensure non-zero value for maximum radius
-
-    # Reduced the numbers to their appropriate values
-    redu_x = temp_x / 10 ** float_precision_
-    redu_y = temp_y / 10 ** float_precision_
+    # To generate floats between range, use uniform
+    redu_x = random.uniform(min_x, max_x)
+    redu_y = random.uniform(min_y, max_y)
 
     # Produce a random radius (cannot make circle touch or exceed edges of plane)
     # Assume min is 0
@@ -39,16 +36,13 @@ def create_circle(max_x, max_y, float_precision_):
     x_up = max_x - redu_x
     x_down = max_x - x_up  # can be derived by getting the opposite side of the line from our center axis
     y_up = max_y - redu_y
-    y_down = max_y - y_up # We determine minimums at zero
+    y_down = max_y - y_up  # We determine minimums at zero
 
     # This is the largest number the radius can be
     radius_max = min([x_up, x_down, y_up, y_down])
 
-    # The max radius has to be converted to an integer temporarily to use this random within range function
-    radius_big = random.randrange(1, stop=int(round(radius_max * 10 ** float_precision_, 0)))
-
     # Convert the number back to a float
-    radius = radius_big / 10 ** float_precision_
+    radius = random.uniform(min_radius, radius_max)
 
     return redu_x, redu_y, radius
 
@@ -90,9 +84,6 @@ def main(core_use):
     # Load or create configuration
     config_local = configure.helper(os.path.join("config", "static.json"))
 
-    # Decimal places for rounding functions
-    float_precision = int(config_local.config["float_precision"])
-
     # max x and y value for coordinate place. Minimum is zero
     max_coor_value = float(config_local.config['max_coor_value'])
 
@@ -101,6 +92,18 @@ def main(core_use):
 
     # Highest number of allowed circles
     num_circles_max = int(config_local.config['num_circle_max'])
+
+    # Lowest circle radius
+    radius_min = float(config_local.config['circle_min_radius'])
+
+    # minimum x value
+    min_x_ = 0 + radius_min
+
+    # minimum y value
+    min_y_ = 0 + radius_min
+
+    # num of points in planes
+    mc_points = int(config_local.config['checks_per_plane'])
 
     # Area of the overall fenced area
     area_fence = max_coor_value**2 # Area of a square
@@ -125,15 +128,24 @@ def main(core_use):
         while temp_num_cirs > cir_null:
             cir_null += 1
             # generate a random circle within boundaries established in config
-            circle_temp = create_circle(max_coor_value, max_coor_value, float_precision)
+            circle_temp = create_circle(max_coor_value,
+                                        max_coor_value,
+                                        min_x_,
+                                        min_y_,
+                                        radius_min)
 
             # Add an interpretted dictionary to the list
-            circles_list.append({"x":circle_temp[0],
-                                 "y":circle_temp[1],
-                                 "r":circle_temp[2]})
+            circles_list.append({"x": circle_temp[0],
+                                 "y": circle_temp[1],
+                                 "r": circle_temp[2]})
 
         # Compute area for circles on the plane
-        temp_area = monte_carlo_plane(circles_list, mc_points, max_coor_value, max_coor_value, 0, 0)
+        temp_area = monte_carlo_plane(circles_list,
+                                      mc_points,
+                                      max_coor_value - radius_min,
+                                      max_coor_value - radius_min,
+                                      min_x_,
+                                      min_y_)
 
         # Add list and area to plane dictionary
         plane_dict.update({plane_name: {"plane": circles_list, "area": temp_area}})
@@ -149,8 +161,8 @@ def main(core_use):
     date_string = "{year}_{day}_{month}_{hour}_{minute}_{core}".format(**timing)
 
     # store config and run info within dictionary
-    plane_dict.update({"config":config_local.config})
-    plane_dict.update({"timestamp":date_string})
+    plane_dict.update({"config": config_local.config})
+    plane_dict.update({"timestamp": date_string})
 
     # Declare filename for output
     outfile = os.path.join("data", "{}.json".format(date_string))
@@ -170,7 +182,6 @@ def main(core_use):
             json_temp = json.dumps(plane_dict, indent=4)
             f.write(json_temp)
             f.close()
-
 
 #%% Execute main
 
