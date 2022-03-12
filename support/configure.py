@@ -10,7 +10,10 @@ import json
 config_variables = ["float_precision",
                     "max_coor_value",
                     "num_circle_min",
-                    "num_circle_max"]
+                    "num_circle_max",
+                    "checks_per_plane",
+                    "circle_min_radius",
+                    "circle_max_radius"]
 
 # Define functions
 
