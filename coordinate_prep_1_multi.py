@@ -13,10 +13,10 @@ import sys
 #%% Static variables
 
 # Number of scenarios to generate
-num_planes = 1000
+num_planes = 10
 
 # Number of monte carlo random casting points
-mc_points = 100000
+mc_points = 10000
 
 # For multiprocessing
 cores_use = 20
