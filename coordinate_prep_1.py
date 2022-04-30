@@ -7,15 +7,40 @@ import json
 import timeit
 import multiprocessing
 
-
-
 #%% Static variables
 
+# Load or create configuration
+config_local = configure.helper(os.path.join("config", "static.json"))
+
+# max x and y value for coordinate place. Minimum is zero
+max_coor_value = float(config_local.config['max_coor_value'])
+
+# Lowest number of circles allowed in each plane
+num_circle_min = int(config_local.config['num_circle_min'])
+
+# Highest number of allowed circles
+num_circles_max = int(config_local.config['num_circle_max'])
+
+# Lowest circle radius
+radius_min = float(config_local.config['circle_min_radius'])
+
+# minimum x value
+min_x_ = 0 + radius_min
+
+# minimum y value
+min_y_ = 0 + radius_min
+
+# num of points in planes
+mc_points = int(config_local.config['checks_per_plane'])
+
 # Number of scenarios to generate
-num_planes = 10
+num_planes = int(config_local.config['num_planes_per_file'])
 
 # For multiprocessing
-cores_use = 8
+cores_use = int(config_local.config['cores_use'])
+
+# machine's outfile
+outfile_hier = str(config_local.config['outfile_directory'])
 
 #%% Define assistant functions
 def create_circle(max_x,
@@ -81,29 +106,7 @@ def monte_carlo_plane(list_of_point_dicts, num_points, max_x, max_y, min_x, min_
 
 #%% Define main function
 def main(core_use):
-    # Load or create configuration
-    config_local = configure.helper(os.path.join("config", "static.json"))
 
-    # max x and y value for coordinate place. Minimum is zero
-    max_coor_value = float(config_local.config['max_coor_value'])
-
-    # Lowest number of circles allowed in each plane
-    num_circle_min = int(config_local.config['num_circle_min'])
-
-    # Highest number of allowed circles
-    num_circles_max = int(config_local.config['num_circle_max'])
-
-    # Lowest circle radius
-    radius_min = float(config_local.config['circle_min_radius'])
-
-    # minimum x value
-    min_x_ = 0 + radius_min
-
-    # minimum y value
-    min_y_ = 0 + radius_min
-
-    # num of points in planes
-    mc_points = int(config_local.config['checks_per_plane'])
 
     # Area of the overall fenced area
     area_fence = max_coor_value**2 # Area of a square
@@ -165,7 +168,7 @@ def main(core_use):
     plane_dict.update({"timestamp": date_string})
 
     # Declare filename for output
-    outfile = os.path.join("data", "{}.json".format(date_string))
+    outfile = os.path.join(outfile_hier, "{}.json".format(date_string))
 
     if os.path.isfile(outfile):
         # Read file as json
