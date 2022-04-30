@@ -9,6 +9,8 @@ import multiprocessing
 
 #%% Static variables
 
+continuation_lock = True
+
 # Load or create configuration
 config_local = configure.helper(os.path.join("config", "static.json"))
 
@@ -190,9 +192,16 @@ def main(core_use):
 
 if __name__ == "__main__":
     tic = timeit.default_timer()
-    pool = multiprocessing.Pool()
-    pool.map(main, range(0, cores_use))
-    pool.close()
-    toc = timeit.default_timer()
-    print("Elapsed time: {}".format(toc - tic))
+    iteration_count = 0
+
+    # Locks the script to run until interupted
+    while continuation_lock:
+        iteration_count += 1
+        pool = multiprocessing.Pool()
+        pool.map(main, range(0, cores_use))
+        pool.close()
+        toc = timeit.default_timer()
+
+        sys.stdout.write("\033[K")  # Cursor up one line
+        print("Elapsed time: {}  Current Iteration: {}".format((toc - tic), iteration_count), end="\r")
 
