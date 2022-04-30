@@ -13,7 +13,10 @@ config_variables = ["float_precision",
                     "num_circle_max",
                     "checks_per_plane",
                     "circle_min_radius",
-                    "circle_max_radius"]
+                    "circle_max_radius",
+                    "outfile_directory",
+                    "cores_use",
+                    "num_planes_per_file"]
 
 # Define functions
 
