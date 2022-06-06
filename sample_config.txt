@@ -1,0 +1,12 @@
+{
+    "float_precision": "8",
+    "max_coor_value": "1",
+    "num_circle_min": "3",
+    "num_circle_max": "6",
+    "checks_per_plane": "1600000",
+    "circle_min_radius": "0.001",
+    "circle_max_radius": "0.5",
+    "outfile_directory": "Z:\\data_share\\coordinates",
+    "cores_use": "8",
+    "num_planes_per_file": "10"
+}
